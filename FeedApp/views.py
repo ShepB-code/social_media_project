@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from .forms import PostForm,ProfileForm, RelationshipForm
 from .models import Post, Comment, Like, Profile, Relationship
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -14,7 +15,30 @@ from django.http import Http404
 
 def index(request):
     """The home page for Learning Log."""
-    return render(request, 'FeedApp/index.html')
+    context = {}
+    user_profile = Profile.objects.filter(user=request.user)
+    if request.user.is_authenticated and user_profile.exists():
+        # get incoming friend requests
+        incoming_friend_requests = Relationship.objects.filter(receiver=Profile.objects.get(user=request.user), status='sent').count()
+
+        if incoming_friend_requests > 0:
+            context['incoming_friend_requests'] = incoming_friend_requests
+
+        # get new posts from today
+        
+        # Calculate the time 24 hours ago from now
+        one_day_ago = timezone.now() - timedelta(days=1)
+        friends = Profile.objects.filter(user=request.user).values('friends')
+
+        # Filter posts newer than 24 hours
+        recent_posts = Post.objects.filter(date_posted__gte=one_day_ago, username__in=friends)
+
+        if recent_posts.exists():
+            context['recent_posts'] = recent_posts
+
+
+    context['has_notifications'] = len(context) != 0
+    return render(request, 'FeedApp/index.html', context)
 
 @login_required
 def profile(request):

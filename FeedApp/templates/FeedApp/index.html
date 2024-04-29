@@ -1,6 +1,22 @@
 {% extends "FeedApp/base.html" %}
 
 {% block page_header %}
+    {% if user.is_authenticated and has_notifications %}
+    <div class="notification">
+        <strong>Notifications:</strong>
+        <ul>
+            <!-- notifications -->
+            <li>Incoming Friend Requests: <a href="{% url 'FeedApp:friends' %}">{{incoming_friend_requests}}</a></li>
+            <li>Recent Posts:
+                {% for post in recent_posts %}
+                    <a href="{% url 'FeedApp:comments' post.id %}">{{ post.username }}</a>{% if not forloop.last %},&nbsp{% endif %}
+                {% empty %}
+                    Up to date.
+                {% endfor %}
+            </li>
+        </ul>
+    </div>
+    {% endif %}
     <div class="jumbotron">
        <h1 class="display-3">Bhojwani Social</h1>
             <p class="lead">A Social Network where you can be you.
@@ -9,4 +25,5 @@
             <a class="btn btn-lg btn-outline-primary" href="{% url 'users:register' %}"
             role="button">Join Now &raquo;</a>
     </div>
+    
 {% endblock page_header %}
