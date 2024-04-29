@@ -21,8 +21,8 @@ def index(request):
         # get incoming friend requests
         incoming_friend_requests = Relationship.objects.filter(receiver=Profile.objects.get(user=request.user), status='sent').count()
 
-        if incoming_friend_requests > 0:
-            context['incoming_friend_requests'] = incoming_friend_requests
+       
+        context['incoming_friend_requests'] = incoming_friend_requests
 
         # get new posts from today
         
@@ -93,6 +93,13 @@ def new_post(request):
     context = {'form':form}
 
     return render(request, 'FeedApp/new_post.html', context)
+
+@login_required
+def delete_post(request, post_id):
+    if request.method == 'POST':
+        post = Post.objects.get(id=post_id, username=request.user)
+        post.delete()
+        return redirect('FeedApp:myfeed')
 
 @login_required
 def friendsfeed(request):

@@ -7,8 +7,8 @@
     <form method="POST">
         {% csrf_token %}
 
+        {% for p,c,l in zipped_list %}
         <table style="font-size: 25px;width: 100%;">
-            {% for p,c,l in zipped_list %}
                 <tr style="border: 1px solid black;padding: 6px;">
                     <td>
                         {{p.username}}:&nbsp {{ p }} <br>
@@ -26,8 +26,9 @@
                     </td>
                     <td>Comments: &nbsp <a href="{% url 'FeedApp:comments' p.id %}">{{c}}</a> &nbsp&nbsp </td>
                 </tr>
-            {% endfor %}
         </table>
+        <br><br>
+        {% endfor %}
 
     </form>
 
