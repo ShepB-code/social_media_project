@@ -14,10 +14,15 @@
         {% for c in comments %}
             <li>
                 {{ c.text }} &nbsp -- &nbsp {{ c.username }}
+                {% if c.username == user %}
+                    <button type="submit" name="btn2" value={{c.id}} class="btn btn-outline-primary">Remove Comment</button>
+                {% endif %}
             </li>
+            <br>
         {% empty %}
             <li>There are no comments for this post.</li>
         {% endfor %}
+        <br><br>
         <p><input type="text" name="comment"></p>
         <p><button type="submit" name="btn1" value=1 class="btn btn-outline-primary">Submit Comment</button></p>
     </form>

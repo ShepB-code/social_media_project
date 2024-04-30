@@ -119,21 +119,27 @@ def friendsfeed(request):
 
     if request.method == 'POST' and request.POST.get("like"):
         post_to_like = request.POST.get("like")
-        print(post_to_like)
         like_already_exists = Like.objects.filter(post_id=post_to_like, username=request.user)
 
         if not like_already_exists.exists():
             Like.objects.create(post_id=post_to_like, username=request.user)
-            return redirect("FeedApp:friendsfeed")
+        else:
+            Like.objects.get(post_id=post_to_like, username=request.user).delete()
+        return redirect("FeedApp:friendsfeed")
+
         
     context = {'posts': posts, 'zipped_list': zipped_list}
     return render(request, 'FeedApp/friendsfeed.html', context)
 
 @login_required
 def comments(request, post_id):
-    if request.method == 'POST' and request.POST.get("btn1"):
-        comment = request.POST.get("comment")
-        Comment.objects.create(post_id=post_id, username=request.user, text=comment, date_added=date.today())
+    if request.method == 'POST':
+        if request.POST.get("btn1"):
+            comment = request.POST.get("comment")
+            Comment.objects.create(post_id=post_id, username=request.user, text=comment, date_added=date.today())
+        elif request.POST.get("btn2"):
+            comment_id = request.POST.get("btn2")
+            Comment.objects.get(id=comment_id).delete()
 
     comments = Comment.objects.filter(post=post_id)
     post = Post.objects.get(id=post_id)
