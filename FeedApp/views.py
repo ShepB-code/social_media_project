@@ -16,25 +16,26 @@ from django.http import Http404
 def index(request):
     """The home page for Learning Log."""
     context = {}
-    user_profile = Profile.objects.filter(user=request.user)
-    if request.user.is_authenticated and user_profile.exists():
-        # get incoming friend requests
-        incoming_friend_requests = Relationship.objects.filter(receiver=Profile.objects.get(user=request.user), status='sent').count()
+    if not request.user.is_anonymous:
+        user_profile = Profile.objects.filter(user=request.user)
+        if user_profile.exists() and request.user.is_authenticated:
+            # get incoming friend requests
+            incoming_friend_requests = Relationship.objects.filter(receiver=Profile.objects.get(user=request.user), status='sent').count()
 
-       
-        context['incoming_friend_requests'] = incoming_friend_requests
-
-        # get new posts from today
         
-        # Calculate the time 24 hours ago from now
-        one_day_ago = timezone.now() - timedelta(days=1)
-        friends = Profile.objects.filter(user=request.user).values('friends')
+            context['incoming_friend_requests'] = incoming_friend_requests
 
-        # Filter posts newer than 24 hours
-        recent_posts = Post.objects.filter(date_posted__gte=one_day_ago, username__in=friends)
+            # get new posts from today
+            
+            # Calculate the time 24 hours ago from now
+            one_day_ago = timezone.now() - timedelta(days=1)
+            friends = Profile.objects.filter(user=request.user).values('friends')
 
-        if recent_posts.exists():
-            context['recent_posts'] = recent_posts
+            # Filter posts newer than 24 hours
+            recent_posts = Post.objects.filter(date_posted__gte=one_day_ago, username__in=friends)
+
+            if recent_posts.exists():
+                context['recent_posts'] = recent_posts
 
 
     context['has_notifications'] = len(context) != 0
