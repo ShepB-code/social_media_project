@@ -1,6 +1,61 @@
 {% extends "FeedApp/base.html" %}
 
 {% block page_header %}
+<script>
+  $(document).ready(function() {
+      var colorThief = new ColorThief();
+  
+      function updateTextColor(carouselItem) {
+          var img = $(carouselItem).find('img')[0]; // Get the image element
+          if (img.complete && img.naturalWidth !== 0) {
+              adjustTextColor(img, carouselItem);
+          } else {
+              img.onload = function() {
+                  adjustTextColor(img, carouselItem);
+              };
+          }
+      }
+  
+      function adjustTextColor(img, carouselItem) {
+        var colorSum = 0;
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
+        var r, g, b, avg;
+
+        for (var x = 0, len = data.length; x < len; x += 4) {
+            r = data[x];
+            g = data[x + 1];
+            b = data[x + 2];
+
+            // Average of the colors (not true luminance)
+            avg = Math.floor((r + g + b) / 3);
+            colorSum += avg;
+        }
+        var brightness = Math.floor(colorSum / (canvas.width * canvas.height));
+
+        var textColor = brightness > 186 ? "black" : (brightness == 0 ? "black" : "white");
+        $(carouselItem).find('.carousel-caption').css('color', textColor);
+      }
+  
+      // Attach event listener for carousel slide event
+      $('#carouselExampleCaptions').on('slid.bs.carousel', function (event) {
+        console.log("Event", event.relatedTarget);
+          updateTextColor(event.relatedTarget); // event.relatedTarget is the new active slide
+      });
+  
+      // Initial color update for the first item
+      updateTextColor($('#carouselExampleCaptions .carousel-item.active'));
+  });
+  </script>
+  
+
     {% if user.is_authenticated and has_notifications %}
     <div class="notification">
         <strong>Notifications:</strong>
@@ -18,12 +73,23 @@
     </div>
     {% endif %}
     <div class="jumbotron">
-       <h1 class="display-3">Bhojwani Social</h1>
-            <p class="lead">A Social Network where you can be you.
-            </p>
+       <h1 class="display-3">
+        {% if user.is_authenticated %}
+            Welcome Back, {{request.user}} 
+        {% else %}
+            Bhojwani Social
+        {% endif %}
+        </h1>
+        <p class="lead">A Social Network where you can be you.
+        </p>
 
+        {% if user.is_authenticated %}
+            <a class="btn btn-lg btn-outline-primary" href="{% url 'FeedApp:myfeed' %}"
+            role="button">New Post &raquo;</a>
+        {% else %}
             <a class="btn btn-lg btn-outline-primary" href="{% url 'users:register' %}"
             role="button">Join Now &raquo;</a>
+        {% endif %}
     </div>
 
     {% if user.is_authenticated %}
