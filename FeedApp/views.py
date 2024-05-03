@@ -4,6 +4,7 @@ from .forms import PostForm,ProfileForm, RelationshipForm
 from .models import Post, Comment, Like, Profile, Relationship
 from datetime import datetime, date, timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 
@@ -153,6 +154,11 @@ def comments(request, post_id):
 def friends(request):
     # get the admin profile and user profile to create the first relationship
     admin_profile = Profile.objects.get(user=1)
+
+    user_profile = Profile.objects.filter(user=request.user)
+    if not user_profile.exists():
+        return redirect("FeedApp:profile")
+    
     user_profile = Profile.objects.get(user=request.user)
 
     # to get current friends
